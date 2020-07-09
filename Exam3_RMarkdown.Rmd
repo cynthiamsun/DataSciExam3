@@ -1,7 +1,10 @@
 ---
-title: "Exam3_RMarkdown"
+title: "Exam 3 RMarkdown"
+font size: 11pt
+geometry: margin=1in
+linestretch: 2
 author: "Cynthia Sun"
-date: "7/9/2020"
+date: "7/8/2020"
 output: pdf_document
 ---
 
@@ -9,22 +12,62 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Part One: Tidy Census Gini
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r eval = FALSE}
+#clear environment
+rm(list = ls(all=TRUE))
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# load tidycensus 
+library(tidycensus)
+census_api_key("0979f51018f9aad11498289530215de0e9dd4c4f", install = TRUE,
+               overwrite = TRUE)
 
-```{r cars}
-summary(cars)
+gini_2010 <- load_variables(year = 2010, "acs5")
+gini_2015 <- load_variables(year = 2015, "acs5")
+
+View(gini_2010)
+View(gini_2015)
+
+# filter gini inequality
+gini_2010 <- get_acs(geography = "county", 
+                 variables = c(gini = c("B19083_001")), 
+                 year = 2010)
+gini_2015 <- get_acs(geography = "county", 
+                     variables = c(gini = c("B19083_001")), 
+                     year = 2010)
+# add years
+gini_2010$year = 2010
+gini_2015$year = 2015
+
+# combine the datasets into a panel data
+library(data.table)
+library(dplyr)
+inequality_panel = left_join(x = gini_2010,
+                          y = gini_2015,
+                          by = "NAME")
+
+# rename NAME variable to `state`
+setnames(inequality_panel, "NAME", "state")
+
+# rename other variables too, make the irrelevant ones null
+inequality_panel <- subset(inequality_panel, select = -c(variable.y))
+inequality_panel <- subset(inequality_panel, select = -c(GEOID.y))
+inequality_panel$year.x <- NULL
+inequality_panel$year.y <- NULL
+
+# rename variables to specify the year
+setnames(inequality_panel, "moe.x", "moe 2010")
+setnames(inequality_panel, "moe.y", "moe 2015")
+setnames(inequality_panel, "variable.x", "variable")
+setnames(inequality_panel, "estimate.x", "estimate 2010")
+setnames(inequality_panel, "estimate.y", "estimate 2015")
+setnames(inequality_panel, "GEOID.x", "GEOID")
+
 ```
 
-## Including Plots
+## Part Two:
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Github Repo
+[Cynthia Sun's Github Repo](https://github.com/cynthiamsun/DataSciExam3)
