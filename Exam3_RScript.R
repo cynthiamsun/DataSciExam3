@@ -70,7 +70,7 @@ inequality_long <- # reshape panel to wide format
                values_to = c("estimate 2010", "estimate 2015"),
                values_drop_na = TRUE)
 
-# NUMER 5
+# NUMBER 5
 
 # collapse the data
 inequality_collapsed <- inequality_long %>%
@@ -78,10 +78,42 @@ inequality_collapsed <- inequality_long %>%
   summarize(across(where(is.numeric), sum)) %>%
   select(-c("transaction_id"))
 
+# state polygons
+#load all the packages
+library(rio)
+library(tidyverse)
+library(googlesheets4)
+library(labelled)
+library(data.table)
+library(varhandle)
+library(ggrepel)
+library(geosphere)
+library(rgeos)
+library(viridis)
+library(mapview)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(devtools)
+library(rnaturalearthhires)
+library(raster)
+library(sp)
+library(sf) #primary package to map stuff, looks like dataframe unlike raster
+library(ggsflabel)
+library(Imap) #nice mapping/color functions
 
+USmap <- ne_countries(continent = "North America", 
+                       scale = "large", 
+                       returnclass = "sf")
+
+#mean of gini
+mean <- mean(inequality_panel$`estimate 2015`)
+US_only = subset(inequality_panel$, continent == "united states of america")
 
 
 # WDI #8 and on
+
+
+
 
 library(WDI)
 gdp_current = WDI(country = "all", indicator = "NY.GDP.MKTP.CD",
@@ -130,17 +162,50 @@ armeniatext =pdf_text(pdf =
 # convert to df
 armeniatext <- as.data.frame(armeniatext, stringAsFactors = FALSE) 
 armeniatext$page=c(1:65) 
-colnames(armeniatext)[which(names(armeniatext) == "text")]
+colnames(armeniatext)[which(names(armeniatext) == "armeniatext")] <- "text"
 
 # TOKENIZE NOW
 tidy_armenia <- armeniatext %>%
   unnest_tokens(word, text) %>%
   anti_join(stop_words)
 
-armeniatext <- armeniatext %>%
-  unnest_tokens(word, text)
+# Frequency
+armeniafreq <- tidy_armenia %>%
+  count(word, sort = TRUE)
+head(armeniafreq, n = 5)
 
-#drop stop words with 
-## data(stop_words) and then follow below
-mytext <- mytext %>%
-  anti_join(stop_words)
+
+### Billboard
+library(rvest)
+hot100page <- "https://www.billboard.com/charts/hot-100"
+hot100exam <- read_html(hot100page)
+
+# check nodes of hot 100
+body_nodes <- hot100exam %>%
+  html_node("body") %>%
+  html_children()
+
+#scrape data for rank, artist, title, and last week
+rank <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//span[contains(@class,
+                       'chart-element__rank__number')]") %>%
+  rvest::html_text()
+
+artist <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//span[contains(@class,
+                       'chart-element__information__artist')]") %>%
+  rvest::html_text()
+
+title <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//span[contains(@class,
+                       'chart-element__information__song')]") %>%
+  rvest::html_text()
+
+last_week <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//div[contains(@class,
+                       'chart-element__meta text')]") %>%
+  rvest::html_text()

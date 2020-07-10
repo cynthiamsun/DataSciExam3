@@ -1,11 +1,13 @@
 ---
 title: "Exam 3 RMarkdown"
+author: "Cynthia Sun"
+date: "7/8/2020"
+output:
+  word_document: default
+  pdf_document: default
 font size: 11pt
 geometry: margin=1in
 linestretch: 2
-author: "Cynthia Sun"
-date: "7/8/2020"
-output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -91,6 +93,47 @@ inequality_long <- # reshape panel to wide format
                values_drop_na = FALSE)
 
 head(inequality_long)
+```
+Map of United States
+```{r}
+# state polygons
+#load all the packages
+library(rio)
+library(tidyverse)
+library(googlesheets4)
+library(labelled)
+library(data.table)
+library(varhandle)
+library(ggrepel)
+library(geosphere)
+library(rgeos)
+library(viridis)
+library(mapview)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(devtools)
+library(rnaturalearthhires)
+library(raster)
+library(sp)
+library(sf) #primary package to map stuff, looks like dataframe unlike raster
+library(ggsflabel)
+library(Imap) #nice mapping/color functions
+
+USmap <- ne_countries(continent = "North America", 
+                       scale = "large", 
+                       returnclass = "sf")
+
+#mean of gini
+mean <- mean(inequality_panel$`estimate 2015`)
+US_only = subset(inequality_panel$continent == "united states of america")
+
+us_final_map = ggplot() +
+  geom_sf(data = us_map) +
+  geom_sf(data = inequality_collapsed, aes(fill = `Log Value`)) +
+  scale_fill_viridis(option = "viridis") +
+  ggtitle("US gini inequality 2006 and 2007") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_void()
 ```
 ## Part Two: WDI GDP
 
