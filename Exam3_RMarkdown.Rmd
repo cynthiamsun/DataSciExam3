@@ -71,7 +71,7 @@ head(inequality_panel)
 ```
 
 Reshape to wide format.
-```{r}
+```{r eval = FALSE}
 # reshape panel to wide format
 library(tidyverse)
 inequality_wide <-
@@ -82,7 +82,7 @@ inequality_wide <-
 head(inequality_wide)
 ```
 Reshape to long format.
-```{r}
+```{r eval = FALSE}
 # reshape panel to long format
 inequality_long <- # reshape panel to wide format
   inequality_wide %>%
@@ -95,7 +95,7 @@ inequality_long <- # reshape panel to wide format
 head(inequality_long)
 ```
 Map of United States
-```{r}
+```{r eval = FALSE}
 # state polygons
 #load all the packages
 library(rio)
@@ -137,7 +137,7 @@ us_final_map = ggplot() +
 ```
 ## Part Two: WDI GDP
 
-```{r}
+```{r eval = FALSE}
 library(WDI)
 gdp_current = WDI(country = "all", indicator = "NY.GDP.MKTP.CD",
                     start = 2006, end = 2007, extra = FALSE, cache = NULL)
@@ -177,7 +177,7 @@ head(gdp_deflated)
 The three main components are: The User Interface, the Server and the shinyApp(ui, server) functions. The User Interface consists of Input ID and Output ID. The Server also consists of the Input ID and Output ID.
 
 ## PART THREE: USAID
-```{r}
+```{r eval = TRUE}
 ## READ PDF FROM WEBSITE
 # first check libraries
 library(pdftools)
@@ -209,7 +209,7 @@ head(armeniafreq, n = 5)
 ```
 
 ## Billboard
-```{r}
+```{r eval = FALSE}
 
 ### Billboard
 library(rvest)
