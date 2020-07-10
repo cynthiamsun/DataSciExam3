@@ -164,5 +164,45 @@ armeniafreq <- tidy_armenia %>%
 head(armeniafreq, n = 5)
 
 ```
+
+## Billboard
+```{r}
+
+### Billboard
+library(rvest)
+hot100page <- "https://www.billboard.com/charts/hot-100"
+hot100exam <- read_html(hot100page)
+
+# check nodes of hot 100
+body_nodes <- hot100exam %>%
+  html_node("body") %>%
+  html_children()
+
+#scrape data for rank, artist, title, and last week
+rank <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//span[contains(@class,
+                       'chart-element__rank__number')]") %>%
+  rvest::html_text()
+
+artist <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//span[contains(@class,
+                       'chart-element__information__artist')]") %>%
+  rvest::html_text()
+
+title <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//span[contains(@class,
+                       'chart-element__information__song')]") %>%
+  rvest::html_text()
+
+last_week <- hot100exam %>%
+  rvest::html_nodes('body') %>%
+  xml2::xml_find_all("//div[contains(@class,
+                       'chart-element__meta text')]") %>%
+  rvest::html_text()
+
+```
 ### Github Repo
 [Cynthia Sun's Github Repo](https://github.com/cynthiamsun/DataSciExam3)
