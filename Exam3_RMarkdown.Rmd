@@ -64,9 +64,67 @@ setnames(inequality_panel, "estimate.x", "estimate 2010")
 setnames(inequality_panel, "estimate.y", "estimate 2015")
 setnames(inequality_panel, "GEOID.x", "GEOID")
 
+#peek at head of data
+head(inequality_panel)
 ```
 
-## Part Two:
+Reshape to wide format.
+```{r}
+# reshape panel to wide format
+library(tidyverse)
+inequality_wide <-
+  inequality_panel %>%
+  pivot_wider(id_cols = c("state", "GEOID", "estimate 2010", "estimate 2015"),
+              names_from = c("state", "GEOID"),
+              values_from = c("estimate 2010", "estimate 2015"))
+head(inequality_wide)
+```
+Reshape to long format.
+```{r}
+# reshape panel to long format
+inequality_long <- # reshape panel to wide format
+  inequality_wide %>%
+  pivot_longer(cols = starts_with('estimate'),
+               names_to = c("state", "GEOID"),
+               names_sep = " ",
+               values_to = c("estimate 2010", "estimate 2015"),
+               values_drop_na = FALSE)
+
+head(inequality_long)
+```
+## Part Two: WDI GDP
+
+```{r}
+library(WDI)
+gdp_current = WDI(country = "all", indicator = "NY.GDP.MKTP.CD",
+                    start = 2006, end = 2007, extra = FALSE, cache = NULL)
+
+#deflate data with USD 2015
+deflator_data = WDI(country = "all", indicator = "NY.GDP.DEFL.ZS",
+                    start = 2006, end = 2007, extra = FALSE, cache = NULL)
+
+# rename deflator variable
+library(data.table)
+setnames(deflator_data, "NY.GDP.DEFL.ZS", "deflator")
+
+#subset to get data frame with only USD, remove deflator table
+usd_deflator <- subset(deflator_data, country == "United States")
+rm(deflator_data)
+
+#drop unnecessary variables
+usd_deflator$iso2c <- NULL
+usd_deflator$country <- NULL
+
+#merge to match years + deflation rates by USD
+gdp_deflated = left_join(x = gdp_current,
+                          y = usd_deflator,
+                          by = "year")
+setnames(gdp_deflated, "NY.GDP.MKTP.CD", "GDP")
+
+# ACTUALLY FUNCTION OF DEFLATING IT
+gdp_deflated$deflated_amount = gdp_deflated$GDP/
+  (gdp_deflated$deflator/100)
+```
 
 
 ### Github Repo
