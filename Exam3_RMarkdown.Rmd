@@ -124,8 +124,45 @@ setnames(gdp_deflated, "NY.GDP.MKTP.CD", "GDP")
 # ACTUALLY FUNCTION OF DEFLATING IT
 gdp_deflated$deflated_amount = gdp_deflated$GDP/
   (gdp_deflated$deflator/100)
+
+# peek at data
+head(gdp_deflated)
 ```
+- I picked constant 2015 USD because it is more accurate.
 
+### Question 10
+The three main components are: The User Interface, the Server and the shinyApp(ui, server) functions. The User Interface consists of Input ID and Output ID. The Server also consists of the Input ID and Output ID.
 
+## PART THREE: USAID
+```{r}
+## READ PDF FROM WEBSITE
+# first check libraries
+library(pdftools)
+library(tidyr) 
+library(tidytext) 
+library(dplyr) 
+library(stringr) 
+library(ggplot2)
+
+# read pdf from the website
+armeniatext =pdf_text(pdf =
+                  "https://pdf.usaid.gov/pdf_docs/PA00TNMG.pdf")
+
+# convert to df
+armeniatext <- as.data.frame(armeniatext, stringAsFactors = FALSE) 
+armeniatext$page=c(1:65) 
+colnames(armeniatext)[which(names(armeniatext) == "armeniatext")] <- "text"
+
+# TOKENIZE NOW
+tidy_armenia <- armeniatext %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+
+# Frequency
+armeniafreq <- tidy_armenia %>%
+  count(word, sort = TRUE)
+head(armeniafreq, n = 5)
+
+```
 ### Github Repo
 [Cynthia Sun's Github Repo](https://github.com/cynthiamsun/DataSciExam3)

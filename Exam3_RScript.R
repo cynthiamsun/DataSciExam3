@@ -112,3 +112,35 @@ setnames(gdp_deflated, "NY.GDP.MKTP.CD", "GDP")
 # ACTUALLY FUNCTION OF DEFLATING IT
 gdp_deflated$deflated_amount = gdp_deflated$GDP/
   (gdp_deflated$deflator/100)
+
+
+## READ PDF FROM WEBSITE
+# first check libraries
+library(pdftools)
+library(tidyr) 
+library(tidytext) 
+library(dplyr) 
+library(stringr) 
+library(ggplot2)
+
+# read pdf from the website
+armeniatext =pdf_text(pdf =
+                  "https://pdf.usaid.gov/pdf_docs/PA00TNMG.pdf")
+
+# convert to df
+armeniatext <- as.data.frame(armeniatext, stringAsFactors = FALSE) 
+armeniatext$page=c(1:65) 
+colnames(armeniatext)[which(names(armeniatext) == "text")]
+
+# TOKENIZE NOW
+tidy_armenia <- armeniatext %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+
+armeniatext <- armeniatext %>%
+  unnest_tokens(word, text)
+
+#drop stop words with 
+## data(stop_words) and then follow below
+mytext <- mytext %>%
+  anti_join(stop_words)
